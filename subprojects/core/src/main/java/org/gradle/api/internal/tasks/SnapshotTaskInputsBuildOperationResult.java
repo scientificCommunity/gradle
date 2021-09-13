@@ -148,14 +148,20 @@ public class SnapshotTaskInputsBuildOperationResult implements SnapshotTaskInput
 
         @Override
         public SnapshotVisitResult visitEntry(FileSystemLocationSnapshot snapshot) {
+            String path = snapshot.getAbsolutePath();
+            FileSystemLocationFingerprint fingerprint = fingerprints.get(path);
+
             if (snapshot.getType() == FileType.Directory) {
-                return SnapshotVisitResult.CONTINUE;
+                if (fingerprint == null) {
+                    return SnapshotVisitResult.SKIP_SUBTREE;
+                } else {
+                    return SnapshotVisitResult.CONTINUE;
+                }
             }
 
-            this.path = snapshot.getAbsolutePath();
+            this.path = path;
             this.name = snapshot.getName();
 
-            FileSystemLocationFingerprint fingerprint = fingerprints.get(path);
             if (fingerprint == null) {
                 return SnapshotVisitResult.CONTINUE;
             }
